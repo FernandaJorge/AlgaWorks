@@ -1,8 +1,10 @@
 package com.algaworks.algafood.api.controller;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,15 +38,15 @@ public class RestauranteController {
 	
 	@GetMapping
 	public List<Restaurante> listar() {
-		return restauranteRepository.listaTodos();
+		return restauranteRepository.findAll();
 	}
 	
 	@GetMapping("/{restauranteId}")
 	public ResponseEntity<Restaurante> buscaPorId(@PathVariable Long restauranteId){
-		Restaurante restaurante = restauranteRepository.porId(restauranteId);
+		Optional<Restaurante> restaurante = restauranteRepository.findById(restauranteId);
 		
-		if (restaurante != null) {
-			return ResponseEntity.ok(restaurante);
+		if (restaurante.isPresent()) {
+			return ResponseEntity.ok(restaurante.get());
 		}
 		
 		return ResponseEntity.notFound().build();
@@ -66,13 +68,13 @@ public class RestauranteController {
 	@PutMapping("/{restauranteId}")
 	public ResponseEntity<?> atualizar(@PathVariable Long restauranteId, @RequestBody Restaurante restaurante) {
 		try {
-			Restaurante restauranteAtual = restauranteRepository.porId(restauranteId);
+			Optional<Restaurante> restauranteAtual = restauranteRepository.findById(restauranteId);
 			
-			if (restauranteAtual != null) {
-				BeanUtils.copyProperties(restaurante, restauranteAtual, "id");
+			if (restauranteAtual.isPresent()) {
+				BeanUtils.copyProperties(restaurante, restauranteAtual.get(), "id");
 				
-				restauranteAtual = restauranteService.salvar(restauranteAtual);
-				return ResponseEntity.ok(restauranteAtual);
+				Restaurante restauranteSalvo = restauranteService.salvar(restauranteAtual.get());
+				return ResponseEntity.ok(restauranteSalvo);
 			}
 			
 			return ResponseEntity.notFound().build();
@@ -89,7 +91,7 @@ public class RestauranteController {
 	@PatchMapping("/{restauranteId}")
 	public ResponseEntity<?> atualizarParcial(@PathVariable Long restauranteId, @RequestBody Map<String, Object> campos){
 		
-		Restaurante restauranteAtual = restauranteRepository.porId(restauranteId);
+		Restaurante restauranteAtual = restauranteRepository.findById(restauranteId).orElse(null);
 		
 		if (restauranteAtual == null) {
 			return ResponseEntity.notFound().build();
@@ -132,5 +134,39 @@ public class RestauranteController {
 			ReflectionUtils.setField(field, restauranteDestino, novoValor);;
 		});
 	}
-
+	
+	@GetMapping("/portaxafrete")
+	public List<Restaurante> restaurantePorTaxaFrete(BigDecimal taxaInicial, BigDecimal taxaFinal) {
+		return restauranteRepository.queryByTaxaFreteBetween(taxaInicial, taxaFinal);
+	}
+	
+	@GetMapping("/pornome-cozinha")
+	public List<Restaurante> restaurantePorNomeCozinha(String nome, Long cozinha) {
+		return restauranteRepository.findByNomeContainingAndCozinhaId(nome, cozinha);
+	}
+	
+	@GetMapping("/primeiro-pornome")
+	public Optional<Restaurante> restaurantePrimeiroPorNome(String nome) {
+		return restauranteRepository.findFirstByNomeContaining(nome);
+	}
+	
+	@GetMapping("/top2-pornome")
+	public List<Restaurante> restauranteTop2PorNome(String nome) {
+		return restauranteRepository.findTop2ByNomeContaining(nome);
+	}
+	
+	@GetMapping("/count-porcozinha")
+	public int restaurantesPorCozinha(Long id) {
+		return restauranteRepository.countByCozinhaId(id);
+	}
+	
+	@GetMapping("/pornome")
+	public List<Restaurante> restaurantePorNome(String nome) {
+		return restauranteRepository.consultaPorNome(nome);
+	}
+	
+	@GetMapping("/pornome-frete")
+	public List<Restaurante> restaurantePorNomeeTaxa(String nome, BigDecimal taxaInicial, BigDecimal taxaFinal) {
+		return restauranteRepository.find(nome, taxaInicial, taxaFinal);
+	}
 }

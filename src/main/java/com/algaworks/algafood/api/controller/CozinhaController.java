@@ -1,6 +1,7 @@
 package com.algaworks.algafood.api.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class CozinhaController {
 	
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<Cozinha> listar() {
-		return cozinhaRepository.listaTodas();
+		return cozinhaRepository.findAll();
 	}
 	
 	
@@ -44,7 +45,7 @@ public class CozinhaController {
 	//mudar o status http de uma forma mais programatica, representa uma respota http que pode 
 	//até uma instancia dentro da reposta
 	public ResponseEntity<Cozinha> buscar(@PathVariable Long cozinhaId) {
-		Cozinha cozinha = cozinhaRepository.porId(cozinhaId);
+		Optional<Cozinha> cozinha = cozinhaRepository.findById(cozinhaId);
 		
 		//uma forma de usar o RESPONSEENTITY é com o FUND que é movendo o link de resposta, para isso 
 		//configuramos o header de resposta passando o novo link de direcionamento
@@ -59,9 +60,9 @@ public class CozinhaController {
 		//return ResponseEntity.ok(cozinha); // resposta simples e curta que representa a mesma coisa de cima
 		
 		//retornando quando uma resource é inexistente
-		//verifico se o retorno não é nullo
-		if (cozinha != null) {
-			return ResponseEntity.ok(cozinha);
+		//verifico se esta presente
+		if (cozinha.isPresent()) {
+			return ResponseEntity.ok(cozinha.get());
 		}
 		
 		//caso não exista retorna um 404
@@ -77,19 +78,19 @@ public class CozinhaController {
 
 	@PutMapping("/{cozinhaId}")
 	public ResponseEntity<Cozinha> atualizar(@PathVariable Long cozinhaId, @RequestBody Cozinha cozinha) {
-		Cozinha cozinhaAtual = cozinhaRepository.porId(cozinhaId);
+		 Optional<Cozinha> cozinhaAtual = cozinhaRepository.findById(cozinhaId);
 		
-		if (cozinhaAtual != null) {
+		if (cozinhaAtual.isPresent()) {
 			//cozinhaAtual.setNome(cozinha.getNome()); // pode ser feito assim obj por obj
 		
 			//Quando queremos atualizar todos os objetos de uma vez uso
 			//O BeanUtils.copyProperties indica que estou copiando os parametros passados para o corpo para instacia atual
 			//o terceiro parametro eu indico que estou excluindo o id da atualização pq não modifico ele
-			BeanUtils.copyProperties(cozinha, cozinhaAtual, "id"); 
+			BeanUtils.copyProperties(cozinha, cozinhaAtual.get(), "id"); 
 		
-			cadastroCozinhaService.salvar(cozinhaAtual);
+			Cozinha cozinhaSalva = cadastroCozinhaService.salvar(cozinhaAtual.get());
 			
-			return ResponseEntity.ok(cozinhaAtual);
+			return ResponseEntity.ok(cozinhaSalva);
 		}
 		
 		return ResponseEntity.notFound().build();
@@ -109,6 +110,22 @@ public class CozinhaController {
 			return ResponseEntity.status(HttpStatus.CONFLICT).build();
 		}
 	}
+	
+	
+	@GetMapping("/pornome")
+	public List<Cozinha> consultaPorNome(String nome){
+		return cozinhaRepository.findTodasByNomeContaining(nome);
+	}
+	
+	@GetMapping("/unica-pornome")
+	public Optional<Cozinha> unicaPorNome(String nome){
+		return cozinhaRepository.findByNome(nome);
+	}
+	
+	@GetMapping("/exists")
+	public boolean cozinhaExists(String nome){
+		return cozinhaRepository.existsByNome(nome);
+	} 
 }
 
 

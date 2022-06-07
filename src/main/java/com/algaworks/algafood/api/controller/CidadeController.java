@@ -1,6 +1,7 @@
 package com.algaworks.algafood.api.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.algaworks.algafood.domain.exception.EntidadeEmUsoException;
@@ -34,15 +34,15 @@ public class CidadeController {
 	
 	@GetMapping
 	public List<Cidade> listar() {
-		return cidadeRepository.listaTodos();	
+		return cidadeRepository.findAll();	
 	}
 
 	@GetMapping("{cidadeId}")
 	public ResponseEntity<Cidade> buscar(@PathVariable Long cidadeId){
-		Cidade cidade = cidadeRepository.porId(cidadeId);
+	    Optional<Cidade> cidade = cidadeRepository.findById(cidadeId);
 			
-		if (cidade != null) {
-			return ResponseEntity.ok(cidade);
+		if (cidade.isPresent()) {
+			return ResponseEntity.ok(cidade.get());
 		}
 		
 		return ResponseEntity.notFound().build();
@@ -62,13 +62,13 @@ public class CidadeController {
 	
 	@PutMapping("/{cidadeId}")
 	public ResponseEntity<Cidade> atualizar(@PathVariable Long cidadeId, @RequestBody Cidade cidade) {
-		Cidade cidadeAtual = cidadeRepository.porId(cidadeId);
+		Optional<Cidade>  cidadeAtual = cidadeRepository.findById(cidadeId);
 		
-		if (cidadeAtual != null) {
-			BeanUtils.copyProperties(cidade, cidadeAtual, "id");
+		if (cidadeAtual.isPresent()) {
+			BeanUtils.copyProperties(cidade, cidadeAtual.get(), "id");
 			
-			cidadeAtual = cidadeService.salvar(cidadeAtual);
-			return ResponseEntity.ok(cidadeAtual);
+			Cidade cidadeSalva = cidadeService.salvar(cidadeAtual.get());
+			return ResponseEntity.ok(cidadeSalva);
 		}
 		
 		return ResponseEntity.notFound().build();

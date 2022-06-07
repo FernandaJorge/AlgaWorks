@@ -1,43 +1,59 @@
 package com.algaworks.algafood.infrastructure.repository;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.repository.query.JpaQueryLookupStrategy;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import com.algaworks.algafood.domain.modal.Restaurante;
-import com.algaworks.algafood.domain.repository.RestauranteRepository;
+import com.algaworks.algafood.domain.repository.RestauranteRepositoryQueries;
 
-@Component
-public class RestauranteRepositoryImpl implements RestauranteRepository{
+import lombok.var;
 
+
+@Repository
+public class RestauranteRepositoryImpl implements RestauranteRepositoryQueries {
+	
 	@PersistenceContext
-	EntityManager manager;
+	private EntityManager manager;
 	
 	@Override
-	public List<Restaurante> listaTodos() {
-		return manager.createQuery("from Restaurante", Restaurante.class).getResultList();
-	}
+	public List<Restaurante> find(String nome, 
+			BigDecimal taxaFreteInicial, BigDecimal taxaFreteFinal) {
+		
+		var jpql = new StringBuilder();
+		jpql.append("from Restaurante where 0 = 0 ");
+		
+		var parametros = new HashMap<String, Object>();
+		
+		if (StringUtils.hasLength(nome)) {
+			jpql.append("and nome like :nome ");
+			parametros.put("nome", "%" + nome + "%");
+		}
+		
+		if (taxaFreteInicial != null) {
+			jpql.append("and taxaFrete >= :taxaInicial ");
+			parametros.put("taxaInicial", taxaFreteInicial);
+		}
+		
+		if (taxaFreteFinal != null) {
+			jpql.append("and taxaFrete <= :taxaFinal ");
+			parametros.put("taxaFinal", taxaFreteFinal);
+		}
+		
+		TypedQuery<Restaurante> query = manager
+				.createQuery(jpql.toString(), Restaurante.class);
+		
+		parametros.forEach((chave, valor) -> query.setParameter(chave, valor));
 
-	@Override
-	public Restaurante porId(Long id) {
-		return manager.find(Restaurante.class, id);
-	}
-
-	@Transactional
-	@Override
-	public Restaurante adicionar(Restaurante restaurante) {
-		return manager.merge(restaurante);
-	}
-
-	@Transactional
-	@Override
-	public void remover(Restaurante restaurante) {
-		restaurante = porId(restaurante.getId());
-		manager.remove(restaurante);
+		return query.getResultList();
 	}
 
 }
