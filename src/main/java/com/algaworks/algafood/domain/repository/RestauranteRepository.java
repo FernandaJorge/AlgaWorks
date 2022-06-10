@@ -12,7 +12,7 @@ import com.algaworks.algafood.domain.modal.Restaurante;
 
 public interface RestauranteRepository 
 	extends JpaRepository<Restaurante, Long>, RestauranteRepositoryQueries,
-	JpaSpecificationExecutor<Restaurante>{
+		JpaSpecificationExecutor<Restaurante>{
 	
 	//Existem outros prefixos que podemos usar além do findBy, como por exemplo: readBy, getBy, queryBy ou streamBy
 	List<Restaurante> queryByTaxaFreteBetween(BigDecimal taxaInicial, BigDecimal taxaFinal);
