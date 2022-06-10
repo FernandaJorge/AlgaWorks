@@ -1,6 +1,7 @@
 package com.algaworks.algafood.infrastructure.repository;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -12,6 +13,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import com.algaworks.algafood.domain.modal.Restaurante;
 import com.algaworks.algafood.domain.repository.RestauranteRepositoryQueries;
@@ -34,16 +36,25 @@ public class RestauranteRepositoryImpl implements RestauranteRepositoryQueries {
 		CriteriaQuery<Restaurante> criteria = builder.createQuery(Restaurante.class);
 		Root<Restaurante> root = criteria.from(Restaurante.class);//from Restaurante retorna um Root - representa a raiz então o Restaurante
 		
-		//dentro do criteria temos o where que recebe predicados como x = y and x >= 0. Para criar esses predicados,
-		//temos que criar uma variavel do tipo o Predicate, usando do bulder pegamos a instrução like e passamos 
-		//a coluna que vamos filtar e o que vamos usar como parametro pra pesquisa
-		Predicate nomePredicate = builder.like(root.get("nome"), "%" + nome + "%" );
-		Predicate taxaInicialPredicate = builder.greaterThanOrEqualTo(root.get("taxaFrete"), taxaFreteInicial);
-		Predicate taxaFinalPredicate = builder.lessThanOrEqualTo(root.get("taxaFrete"), taxaFreteFinal);
+		//criando um array list dos predicados para uma consulta dinamica
 		
+		var predicates = new ArrayList<Predicate>();
 		
-		//depois passo para o where os predicados que vou usar como filtro
-		criteria.where(nomePredicate, taxaInicialPredicate, taxaFinalPredicate);
+		if (StringUtils.hasText(nome)) {
+			predicates.add(builder.like(root.get("nome"), "%" + nome + "%" ));
+		}
+		
+		if (taxaFreteInicial != null) {
+			predicates.add(builder.greaterThanOrEqualTo(root.get("taxaFrete"), taxaFreteInicial));
+		}
+
+		if (taxaFreteFinal != null) {
+			predicates.add(builder.lessThanOrEqualTo(root.get("taxaFrete"), taxaFreteFinal));
+		}
+
+		
+		// o list de array em array passando um array 0
+		criteria.where(predicates.toArray(new Predicate[0]));
 		
 		TypedQuery<Restaurante> query = manager.createQuery(criteria);
 		return query.getResultList();
