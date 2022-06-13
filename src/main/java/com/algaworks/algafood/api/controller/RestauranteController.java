@@ -179,4 +179,12 @@ public class RestauranteController {
 		
 		return restauranteRepository.findComFreteGratis(nome);
 	}
+	
+	//busca pelo repositorio customizado
+	@GetMapping("/primeiro")
+	public Optional<Restaurante> restaurantePrimeiro() {	
+		return restauranteRepository.buscarPrimeiro();
+	}
 }
+
+

@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.algaworks.algafood.domain.modal.Restaurante;
 
 public interface RestauranteRepository 
-	extends JpaRepository<Restaurante, Long>, RestauranteRepositoryQueries,
+	extends CustomJpaRepository<Restaurante, Long>, RestauranteRepositoryQueries,
 		JpaSpecificationExecutor<Restaurante>{
 	
 	//Existem outros prefixos que podemos usar além do findBy, como por exemplo: readBy, getBy, queryBy ou streamBy
