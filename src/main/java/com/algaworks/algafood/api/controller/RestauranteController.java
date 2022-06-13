@@ -1,5 +1,8 @@
 package com.algaworks.algafood.api.controller;
 
+import static com.algaworks.algafood.infrastructure.repository.spec.RestauranteSpecs.comFreteGratis;
+import static com.algaworks.algafood.infrastructure.repository.spec.RestauranteSpecs.comNomeSemelhante;
+
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.List;
@@ -169,4 +172,19 @@ public class RestauranteController {
 	public List<Restaurante> restaurantePorNomeeTaxa(String nome, BigDecimal taxaInicial, BigDecimal taxaFinal) {
 		return restauranteRepository.find(nome, taxaInicial, taxaFinal);
 	}
+	
+	//Usando Specification
+	@GetMapping("/com-frete-gratis")
+	public List<Restaurante> restauranteComFreteGratis(String nome) {
+		
+		return restauranteRepository.findComFreteGratis(nome);
+	}
+	
+	//busca pelo repositorio customizado
+	@GetMapping("/primeiro")
+	public Optional<Restaurante> restaurantePrimeiro() {	
+		return restauranteRepository.buscarPrimeiro();
+	}
 }
+
+
