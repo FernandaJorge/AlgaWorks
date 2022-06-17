@@ -43,9 +43,8 @@ public class Restaurante {
 	@Column(name = "taxa_frete", nullable = false)
 	private BigDecimal taxaFrete;
 	
-	//@JsonIgnore
-	@JsonIgnoreProperties("hibernateLazyInitializer") //anotacao que ignora da instancia Cozinha para não ser serializada
-	@ManyToOne(fetch = FetchType.LAZY) //Indica que muitos restaurantes possuem muitas cozinhas, com fecth eu indico para fazer a consulta do Tipo Lazy
+	
+	@ManyToOne // (fetch = FetchType.LAZY) -- Indica que muitos restaurantes possuem muitas cozinhas, com fecth eu indico para fazer a consulta do Tipo Lazy
 	@JoinColumn(name = "cozinha_id", nullable = false)
 	private Cozinha cozinha;
 	
@@ -61,7 +60,7 @@ public class Restaurante {
 	@Column(nullable = false, columnDefinition = "datetime") //anotacao do hibernate que implementa a data de atualizacao automaticamente
 	private LocalDateTime dataAtualizacao;
 	
-	@JsonIgnore
+	//@JsonIgnore
 	@ManyToMany //Incdica que muitos restaurantes possuem muitas formas de pagamento
 	@JoinTable(name = "restaurante_forma_pagamento", //crio a tabela de relacionamento
 			joinColumns = @JoinColumn(name = "restaurante_id"), //crio o nome da coluna (forenkey) da tab de relacionamento com a de restaurante

@@ -14,6 +14,9 @@ public interface RestauranteRepository
 	extends CustomJpaRepository<Restaurante, Long>, RestauranteRepositoryQueries,
 		JpaSpecificationExecutor<Restaurante>{
 	
+	@Query ("from Restaurante r join r.cozinha join fetch r.formasPagamento") // com o join eu indico para fazer a junção das duas querys e com o fecth indico para fazer um uma consulta só
+	List<Restaurante> findAll();
+	
 	//Existem outros prefixos que podemos usar além do findBy, como por exemplo: readBy, getBy, queryBy ou streamBy
 	List<Restaurante> queryByTaxaFreteBetween(BigDecimal taxaInicial, BigDecimal taxaFinal);
 	
