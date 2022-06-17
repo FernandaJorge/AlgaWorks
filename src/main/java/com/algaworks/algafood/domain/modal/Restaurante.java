@@ -22,6 +22,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,7 +43,8 @@ public class Restaurante {
 	@Column(name = "taxa_frete", nullable = false)
 	private BigDecimal taxaFrete;
 	
-	@JsonIgnore
+	//@JsonIgnore
+	@JsonIgnoreProperties("hibernateLazyInitializer") //anotacao que ignora da instancia Cozinha para não ser serializada
 	@ManyToOne(fetch = FetchType.LAZY) //Indica que muitos restaurantes possuem muitas cozinhas, com fecth eu indico para fazer a consulta do Tipo Lazy
 	@JoinColumn(name = "cozinha_id", nullable = false)
 	private Cozinha cozinha;
