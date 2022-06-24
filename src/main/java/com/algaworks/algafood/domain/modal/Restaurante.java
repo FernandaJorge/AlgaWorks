@@ -60,7 +60,7 @@ public class Restaurante {
 	@Column(nullable = false, columnDefinition = "datetime") //anotacao do hibernate que implementa a data de atualizacao automaticamente
 	private LocalDateTime dataAtualizacao;
 	
-	//@JsonIgnore
+	@JsonIgnore
 	@ManyToMany //Incdica que muitos restaurantes possuem muitas formas de pagamento
 	@JoinTable(name = "restaurante_forma_pagamento", //crio a tabela de relacionamento
 			joinColumns = @JoinColumn(name = "restaurante_id"), //crio o nome da coluna (forenkey) da tab de relacionamento com a de restaurante
