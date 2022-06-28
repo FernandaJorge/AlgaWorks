@@ -113,23 +113,23 @@ public class CozinhaController {
 //	}
 	
 	
-//	@DeleteMapping("/{cozinhaId}")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	public void remover(@PathVariable Long cozinhaId) {
-//		cadastroCozinhaService.excluir(cozinhaId);
-//	}
-	
-	
 	@DeleteMapping("/{cozinhaId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void remover(@PathVariable Long cozinhaId) {
-		try {
-			cadastroCozinhaService.excluir(cozinhaId);
-		} catch (EntidadeNaoEncontradaException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-		}
+		cadastroCozinhaService.excluir(cozinhaId);
 	}
 	
+//	
+//	@DeleteMapping("/{cozinhaId}")
+//	@ResponseStatus(HttpStatus.NO_CONTENT)
+//	public void remover(@PathVariable Long cozinhaId) {
+//		try {
+//			cadastroCozinhaService.excluir(cozinhaId);
+//		} catch (EntidadeNaoEncontradaException e) {
+//			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+//		}
+//	}
+//	
 	
 	@GetMapping("/pornome")
 	public List<Cozinha> consultaPorNome(String nome){
