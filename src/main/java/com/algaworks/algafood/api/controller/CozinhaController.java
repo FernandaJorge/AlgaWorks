@@ -45,30 +45,8 @@ public class CozinhaController {
 	//ReponseEntity permite ter uma resposta mais fina do Http como adicionar Headers, 
 	//mudar o status http de uma forma mais programatica, representa uma respota http que pode 
 	//até uma instancia dentro da reposta
-	public ResponseEntity<Cozinha> buscar(@PathVariable Long cozinhaId) {
-		Optional<Cozinha> cozinha = cozinhaRepository.findById(cozinhaId);
-		
-		//uma forma de usar o RESPONSEENTITY é com o FUND que é movendo o link de resposta, para isso 
-		//configuramos o header de resposta passando o novo link de direcionamento
-		//dentro HTTPHEADERS como em HTTPSTATUS, temos todos os tipos de headers que podemos utilizar		
-		//HttpHeaders header = new HttpHeaders();
-		//header.add(HttpHeaders.LOCATION, "http://localhost:8080/cozinhas");
-		//return ResponseEntity.status(HttpStatus.FOUND).headers(header).build();
-		
-		//return ResponseEntity.status(HttpStatus.OK).build() //desta forma eu retorno a resposta http sem o corpo
-
-		//return ResponseEntity.status(HttpStatus.OK).body(cozinha); //Retorno a resposta http com o corpo da resposta
-		//return ResponseEntity.ok(cozinha); // resposta simples e curta que representa a mesma coisa de cima
-		
-		//retornando quando uma resource é inexistente
-		//verifico se esta presente
-		if (cozinha.isPresent()) {
-			return ResponseEntity.ok(cozinha.get());
-		}
-		
-		//caso não exista retorna um 404
-		//return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); //forma longa
-		return ResponseEntity.notFound().build(); //forma curta
+	public Cozinha buscar(@PathVariable Long cozinhaId) {		
+		return cadastroCozinhaService.buscarOuFalhar(cozinhaId);
 	}
 	
 	@ResponseStatus(HttpStatus.CREATED)
@@ -78,58 +56,22 @@ public class CozinhaController {
 	}
 
 	@PutMapping("/{cozinhaId}")
-	public ResponseEntity<Cozinha> atualizar(@PathVariable Long cozinhaId, @RequestBody Cozinha cozinha) {
-		 Optional<Cozinha> cozinhaAtual = cozinhaRepository.findById(cozinhaId);
+	public Cozinha atualizar(@PathVariable Long cozinhaId, @RequestBody Cozinha cozinha) {	
+		Cozinha cozinhaAtual = cadastroCozinhaService.buscarOuFalhar(cozinhaId);
+	
+		BeanUtils.copyProperties(cozinha, cozinhaAtual, "id"); 
 		
-		if (cozinhaAtual.isPresent()) {
-			//cozinhaAtual.setNome(cozinha.getNome()); // pode ser feito assim obj por obj
-		
-			//Quando queremos atualizar todos os objetos de uma vez uso
-			//O BeanUtils.copyProperties indica que estou copiando os parametros passados para o corpo para instacia atual
-			//o terceiro parametro eu indico que estou excluindo o id da atualização pq não modifico ele
-			BeanUtils.copyProperties(cozinha, cozinhaAtual.get(), "id"); 
-		
-			Cozinha cozinhaSalva = cadastroCozinhaService.salvar(cozinhaAtual.get());
+		return  cadastroCozinhaService.salvar(cozinhaAtual);
 			
-			return ResponseEntity.ok(cozinhaSalva);
-		}
-		
-		return ResponseEntity.notFound().build();
-		
 	}
 	
-//	@DeleteMapping("/{cozinhaId}")
-//	public ResponseEntity<Cozinha> remover(@PathVariable Long cozinhaId) {
-//		try {
-//			cadastroCozinhaService.excluir(cozinhaId);
-//			return ResponseEntity.noContent().build();
-//			
-//		} catch (EntidadeNaoEncontradaException e) {
-//			return ResponseEntity.notFound().build();
-//			
-//		} catch (EntidadeEmUsoException e) {
-//			return ResponseEntity.status(HttpStatus.CONFLICT).build();
-//		}
-//	}
-	
-	
+		
 	@DeleteMapping("/{cozinhaId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void remover(@PathVariable Long cozinhaId) {
 		cadastroCozinhaService.excluir(cozinhaId);
 	}
 	
-//	
-//	@DeleteMapping("/{cozinhaId}")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	public void remover(@PathVariable Long cozinhaId) {
-//		try {
-//			cadastroCozinhaService.excluir(cozinhaId);
-//		} catch (EntidadeNaoEncontradaException e) {
-//			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-//		}
-//	}
-//	
 	
 	@GetMapping("/pornome")
 	public List<Cozinha> consultaPorNome(String nome){
