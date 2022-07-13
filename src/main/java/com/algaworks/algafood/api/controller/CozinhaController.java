@@ -42,9 +42,6 @@ public class CozinhaController {
 	
 	
 	@GetMapping("/{cozinhaId}")
-	//ReponseEntity permite ter uma resposta mais fina do Http como adicionar Headers, 
-	//mudar o status http de uma forma mais programatica, representa uma respota http que pode 
-	//até uma instancia dentro da reposta
 	public Cozinha buscar(@PathVariable Long cozinhaId) {		
 		return cadastroCozinhaService.buscarOuFalhar(cozinhaId);
 	}
@@ -61,10 +58,9 @@ public class CozinhaController {
 	
 		BeanUtils.copyProperties(cozinha, cozinhaAtual, "id"); 
 		
-		return  cadastroCozinhaService.salvar(cozinhaAtual);
+		return cadastroCozinhaService.salvar(cozinhaAtual);
 			
 	}
-	
 		
 	@DeleteMapping("/{cozinhaId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)

@@ -1,8 +1,5 @@
 package com.algaworks.algafood.api.controller;
 
-import static com.algaworks.algafood.infrastructure.repository.spec.RestauranteSpecs.comFreteGratis;
-import static com.algaworks.algafood.infrastructure.repository.spec.RestauranteSpecs.comNomeSemelhante;
-
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.algaworks.algafood.domain.exception.EntidadeNaoEncontradaException;
@@ -45,47 +43,24 @@ public class RestauranteController {
 	}
 	
 	@GetMapping("/{restauranteId}")
-	public ResponseEntity<Restaurante> buscaPorId(@PathVariable Long restauranteId){
-		Optional<Restaurante> restaurante = restauranteRepository.findById(restauranteId);
-		
-		if (restaurante.isPresent()) {
-			return ResponseEntity.ok(restaurante.get());
-		}
-		
-		return ResponseEntity.notFound().build();
+	public Restaurante buscaPorId(@PathVariable Long restauranteId){
+		return restauranteService.buscarOuFalhar(restauranteId);
 	}
 	
 	@PostMapping()
-	//Usando o ? no ResponseEntity é um Coringa, neste caso ele pode receber como retorno 
-	//uma String ou uma instancia de restaurante
-	public ResponseEntity<?> adicionar(@RequestBody Restaurante restaurante) { 
-		try {
-			restaurante = restauranteService.salvar(restaurante);	
-			return ResponseEntity.status(HttpStatus.CREATED).body(restaurante);
-			
-		} catch (EntidadeNaoEncontradaException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
+	@ResponseStatus(HttpStatus.CREATED)
+	public Restaurante adicionar(@RequestBody Restaurante restaurante) { 
+		return restauranteService.salvar(restaurante);
 	}
 	
 	@PutMapping("/{restauranteId}")
-	public ResponseEntity<?> atualizar(@PathVariable Long restauranteId, @RequestBody Restaurante restaurante) {
-		try {
-			Optional<Restaurante> restauranteAtual = restauranteRepository.findById(restauranteId);
-			
-			if (restauranteAtual.isPresent()) {
-				BeanUtils.copyProperties(restaurante, restauranteAtual.get(), "id", "formasPagamento", "endereco", 
-						"dataCadastro", "produtos");
-				
-				Restaurante restauranteSalvo = restauranteService.salvar(restauranteAtual.get());
-				return ResponseEntity.ok(restauranteSalvo);
-			}
-			
-			return ResponseEntity.notFound().build();
-		
-		} catch (EntidadeNaoEncontradaException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
+	public Restaurante atualizar(@PathVariable Long restauranteId, @RequestBody Restaurante restaurante) {
+	    Restaurante restauranteAtual = restauranteService.buscarOuFalhar(restauranteId);
+	    
+	    BeanUtils.copyProperties(restaurante, restauranteAtual, 
+	            "id", "formasPagamento", "endereco", "dataCadastro", "produtos");
+	    
+	    return restauranteService.salvar(restauranteAtual);
 	}
 	
 	
@@ -93,17 +68,12 @@ public class RestauranteController {
 	//é recomendado que verifiquemos item pode item do objeto para saber qual esta nulo ou não para salvar,
 	//mesmo pq podemos querer atualizar algo para nulo, para isso é o usado o Map
 	@PatchMapping("/{restauranteId}")
-	public ResponseEntity<?> atualizarParcial(@PathVariable Long restauranteId, @RequestBody Map<String, Object> campos){
-		
-		Restaurante restauranteAtual = restauranteRepository.findById(restauranteId).orElse(null);
-		
-		if (restauranteAtual == null) {
-			return ResponseEntity.notFound().build();
-		}
-		
-		merge(campos, restauranteAtual);
-		
-		return atualizar(restauranteId, restauranteAtual);
+	public Restaurante atualizarParcial(@PathVariable Long restauranteId, @RequestBody Map<String, Object> campos){
+	    Restaurante restauranteAtual = restauranteService.buscarOuFalhar(restauranteId);
+	    
+	    merge(campos, restauranteAtual);
+	    
+	    return atualizar(restauranteId, restauranteAtual);
 	}
 
 	private void merge(Map<String, Object> dadosOrigem, Restaurante restauranteDestino) {
