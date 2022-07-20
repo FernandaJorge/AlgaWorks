@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.algaworks.algafood.domain.exception.EntidadeEmUsoException;
 import com.algaworks.algafood.domain.exception.EntidadeNaoEncontradaException;
 import com.algaworks.algafood.domain.modal.Cidade;
+import com.algaworks.algafood.domain.modal.Estado;
 import com.algaworks.algafood.domain.repository.CidadeRepository;
 
 @Service
@@ -18,7 +19,16 @@ public class CadastroCidadeService {
 	@Autowired
 	private CidadeRepository cidadeRepository;
 	
+	@Autowired
+	private CadastroEstadoService estadoService;
+	
 	public Cidade salvar (Cidade cidade) {
+		Long estadoId = cidade.getEstado().getId();
+		
+		Estado estado = estadoService.buscarOuFalhar(estadoId);
+		
+		cidade.setEstado(estado);
+		
 		return cidadeRepository.save(cidade);
 	}
 
