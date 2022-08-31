@@ -65,21 +65,5 @@ public class CidadeController {
 		cidadeService.excluir(cidadeId);	
 	}
 
-	@ExceptionHandler(EntidadeNaoEncontradaException.class)
-	public ResponseEntity<?> tratarEntidadeNaoEncontradaException(EntidadeNaoEncontradaException e){
-		Problema problema = Problema.builder()
-				.dateTime(LocalDateTime.now())
-				.mensagem(e.getMessage()).build();
 
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problema);
-	}
-
-	@ExceptionHandler(NegocioException.class)
-	public ResponseEntity<?> tratarNegocioException(NegocioException e){
-		Problema problema = Problema.builder()
-				.dateTime(LocalDateTime.now())
-				.mensagem(e.getMessage()).build();
-
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problema);
-	}
 }
